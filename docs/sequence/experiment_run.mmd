@@ -1,0 +1,23 @@
+sequenceDiagram
+  participant User
+  participant CLI
+  participant Facade
+  participant DatasetLoader
+  participant Preprocessor
+  participant Trainer
+  participant Evaluator
+  participant ArtifactStore
+
+  User->>CLI: ctd run --dataset nsl_kdd --models rf,cnn,lstm
+  CLI->>Facade: run_experiment(config)
+  Facade->>DatasetLoader: load(train/test)
+  Facade->>Preprocessor: fit_transform(train)
+  Facade->>Preprocessor: transform(test)
+  loop each model
+    Facade->>Trainer: train(train_features, train_labels)
+    Facade->>Evaluator: evaluate(model, test_features, test_labels)
+    Facade->>ArtifactStore: write(run_metadata, metrics, plots)
+  end
+  Facade-->>CLI: summary
+  CLI-->>User: results path + table
+

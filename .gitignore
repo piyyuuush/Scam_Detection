@@ -1,0 +1,21 @@
+.venv/
+__pycache__/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+dist/
+build/
+
+# Data and artifacts are not committed
+data/
+artifacts/
+
+# OS/editor
+.DS_Store
+Thumbs.db
+
+
+# Local smoke outputs
+artifacts_*/
