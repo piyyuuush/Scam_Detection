@@ -1,0 +1,2 @@
+model_id,accuracy,precision,recall,f1,roc_auc
+lstm,0.809439,0.944404,0.706850,0.808539,0.947848
