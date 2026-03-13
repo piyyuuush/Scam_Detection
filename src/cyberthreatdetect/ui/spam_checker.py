@@ -3,7 +3,7 @@ import joblib
 import re
 from pathlib import Path
 
-# ----------------- Light Theme CSS -----------------
+# ----------------- Light Theme CSS with Animations -----------------
 st.markdown("""
 <style>
 .light-card {
@@ -19,16 +19,31 @@ st.markdown("""
     font-weight: bold;
 }
 
+/* Safe message animation */
 .safe-message {
     font-size: 1.5em;
     color: #4CAF50; /* green accent */
     font-weight: bold;
+    animation: fadeIn 1.5s ease-in-out;
 }
 
+/* Spam message animation */
 .spam-message {
     font-size: 1.5em;
     color: #d32f2f; /* red accent */
     font-weight: bold;
+    animation: pulseAlert 1s infinite alternate;
+}
+
+/* Keyframes */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pulseAlert {
+    from { text-shadow: 0 0 5px #d32f2f; }
+    to   { text-shadow: 0 0 20px #d32f2f; }
 }
 </style>
 """, unsafe_allow_html=True)
