@@ -1,0 +1,2 @@
+model_id,accuracy,precision,recall,f1,roc_auc
+cnn,0.791608,0.925159,0.689706,0.790268,0.923192
