@@ -6,42 +6,66 @@ import time
 # --- Custom CSS ---
 st.markdown("""
     <style>
-        .card {
-            background-color: #f9f9f9;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            margin-top: 20px;
+        body, [class*="stApp"] {
+            background-color: #000000 !important;
+            color: #00ffcc !important;
+            font-family: 'Courier New', monospace;
         }
+
+        .card {
+            background-color: #0d0d0d;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px #00ffcc55;
+            margin-top: 20px;
+            border: 1px solid #00ffcc55;
+        }
+
         .red-label {
-            color: red;
+            color: #ff4d6d;
             font-weight: bold;
             font-size: 18px;
+            text-shadow: 0 0 10px #ff4d6d;
         }
+
         .threat-box {
-            background-color: #ffcccc;
-            color: #a80000;
+            background: linear-gradient(90deg, #ff1a1a, #ff4d6d);
+            color: #fff;
             padding: 15px;
-            border-radius: 8px;
+            border-radius: 10px;
             margin-top: 15px;
             font-weight: bold;
-            font-size: 16px;
+            font-size: 18px;
+            text-align: center;
+            box-shadow: 0 0 25px #ff4d6d;
+            animation: blink 1s infinite alternate;
         }
+
         .flags-box {
-            background-color: #fff3cd;
-            color: #856404;
+            background-color: #1a1a1a;
+            color: #ffcc00;
             padding: 15px;
-            border-radius: 8px;
-            margin-top: 10px;
-            font-size: 14px;
+            border-radius: 10px;
+            margin-top: 15px;
+            font-size: 15px;
+            border: 1px solid #ffcc00;
+            box-shadow: 0 0 15px #ffcc00;
         }
+
         .solution-box {
-            background-color: #d4edda;
-            color: #155724;
+            background-color: #1a1a1a;
+            color: #00ffcc;
             padding: 15px;
-            border-radius: 8px;
-            margin-top: 10px;
-            font-size: 14px;
+            border-radius: 10px;
+            margin-top: 15px;
+            font-size: 15px;
+            border: 1px solid #00ffcc;
+            box-shadow: 0 0 15px #00ffcc;
+        }
+
+        @keyframes blink {
+            from { opacity: 1; }
+            to { opacity: 0.6; }
         }
     </style>
 """, unsafe_allow_html=True)
@@ -79,7 +103,7 @@ def scan_zip(file_path: str):
 
 def zip_scanner_app():
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.title("🗂 ZIP File Scanner")
+    st.title("🗂 Neon ZIP File Scanner")
 
     st.markdown('<span class="red-label">Upload ZIP File</span>', unsafe_allow_html=True)
     zip_file = st.file_uploader("", type=["zip"])
@@ -96,7 +120,7 @@ def zip_scanner_app():
         # Progress bar animation
         progress_bar = st.progress(0)
         for percent_complete in range(100):
-            time.sleep(0.02)  # adjust speed here
+            time.sleep(0.01)
             progress_bar.progress(percent_complete + 1)
 
         result = scan_zip(file_path)
@@ -108,13 +132,13 @@ def zip_scanner_app():
         if not result["safe"]:
             st.markdown(f'<div class="threat-box">{result["threat"]}</div>', unsafe_allow_html=True)
             st.markdown(
-                '<div class="flags-box"><b>Suspicious Files:</b><br>' +
+                '<div class="flags-box"><b>🚩 Suspicious Files:</b><br>' +
                 "<br>".join(result["flags"]) +
                 "</div>",
                 unsafe_allow_html=True,
             )
             st.markdown(
-                '<div class="solution-box"><b>How to Protect:</b><br>' +
+                '<div class="solution-box"><b>🛡 How to Protect:</b><br>' +
                 "<br>".join(result["solution"]) +
                 "</div>",
                 unsafe_allow_html=True,
