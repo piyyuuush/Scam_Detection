@@ -107,8 +107,8 @@ textarea {
 # =================== Load Model ===================
 def load_model():
     try:
-        model = joblib.load("src/cyberthreatdetect/artifacts/phishing_model.pkl")
-        vectorizer = joblib.load("src/cyberthreatdetect/artifacts/vectorizer.pkl")
+        model = joblib.load("artifacts/phishing_model.pkl")
+        vectorizer = joblib.load("artifacts/vectorizer.pkl")
         return model, vectorizer
     except Exception as e:
         st.error(f"❌ Model Load Failed: {e}")
