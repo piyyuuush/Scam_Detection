@@ -1,54 +1,10 @@
 import streamlit as st
 import joblib
 import re
+import time
 from pathlib import Path
+import pandas as pd
 
-# ----------------- Light Theme CSS with Animations -----------------
-st.markdown("""
-<style>
-.light-card {
-    background: #F5F5F5;
-    border-radius: 12px;
-    padding: 15px;
-    margin: 10px 0;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-}
-
-.keyword-highlight {
-    color: #d32f2f; /* red accent for spam words */
-    font-weight: bold;
-}
-
-/* Safe message animation */
-.safe-message {
-    font-size: 1.5em;
-    color: #4CAF50; /* green accent */
-    font-weight: bold;
-    animation: fadeIn 1.5s ease-in-out;
-}
-
-/* Spam message animation */
-.spam-message {
-    font-size: 1.5em;
-    color: #d32f2f; /* red accent */
-    font-weight: bold;
-    animation: pulseAlert 1s infinite alternate;
-}
-
-/* Keyframes */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(-10px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes pulseAlert {
-    from { text-shadow: 0 0 5px #d32f2f; }
-    to   { text-shadow: 0 0 20px #d32f2f; }
-}
-</style>
-""", unsafe_allow_html=True)
-
-# ----------------- Load Pipeline -----------------
 def load_pipeline(path: str):
     p = Path(path)
     if not p.exists():
@@ -56,38 +12,24 @@ def load_pipeline(path: str):
         return None
     return joblib.load(p)
 
-# ----------------- Highlight Spam Keywords -----------------
-SPAM_KEYWORDS = [
-    "win", "free", "cash", "gift", "prize", "urgent", "click", "verify",
-    "reward", "congratulations", "loan", "account", "limited", "offer"
-]
+SPAM_KEYWORDS = ["win","free","cash","gift","prize","urgent","click","verify",
+                 "reward","congratulations","loan","account","limited","offer"]
 
 def highlight_keywords(text):
     highlighted = text
     for kw in SPAM_KEYWORDS:
-        highlighted = re.sub(
-            f"(?i)\\b{kw}\\b",
-            f"<span class='keyword-highlight'>{kw}</span>",
-            highlighted
-        )
+        highlighted = re.sub(f"(?i)\\b{kw}\\b", f"**{kw.upper()}**", highlighted)
     return highlighted
 
-# ----------------- Display History -----------------
 def display_history():
     if "history" not in st.session_state or not st.session_state.history:
         return
-
     st.subheader("📝 History")
     for item in reversed(st.session_state.history):
-        st.markdown(f"""
-        <div class="light-card">
-            <p><strong>Message:</strong> {item['Message']}</p>
-            <p><strong>Prediction:</strong> {item['Prediction']}</p>
-            <p><strong>Confidence:</strong> {item['Confidence']}</p>
-        </div>
-        """, unsafe_allow_html=True)
+        st.info(f"**Message:** {item['Message']}\n\n"
+                f"**Prediction:** {item['Prediction']}\n\n"
+                f"**Confidence:** {item['Confidence']}")
 
-# ----------------- Spam Checker -----------------
 def spam_checker_app():
     st.title("🛑 Spam / Scam Checker")
     st.write("✉️ Enter your message below to detect SPAM or SCAM.")
@@ -113,15 +55,25 @@ def spam_checker_app():
             else:
                 probability = max(proba)
 
-            highlighted_message = highlight_keywords(text)
-            st.markdown(f"<div class='light-card'>{highlighted_message}</div>", unsafe_allow_html=True)
+            st.write(highlight_keywords(text))
 
+            # Native attractive UI
             if prediction == 1:
-                st.markdown('<div class="spam-message">🚨 SPAM/SCAM DETECTED!</div>', unsafe_allow_html=True)
+                st.error("🚨 SPAM/SCAM DETECTED!")
             else:
-                st.markdown('<div class="safe-message">✔ Not Spam</div>', unsafe_allow_html=True)
+                st.success("✔ Not Spam")
 
-            # Save to history
+            # Animated confidence bar
+            st.write("Confidence level:")
+            progress = st.progress(0)
+            for i in range(int(probability*100)):
+                progress.progress(i+1)
+                time.sleep(0.01)
+
+            # Metric
+            st.metric("Confidence", f"{probability*100:.2f}%")
+
+            # Save history
             if "history" not in st.session_state:
                 st.session_state.history = []
             st.session_state.history.append({
@@ -131,12 +83,15 @@ def spam_checker_app():
             })
 
             display_history()
-            st.metric("Confidence", f"{probability*100:.2f}%")
+
+            # Probability chart
+            st.subheader("📊 Probability Breakdown")
+            df = pd.DataFrame({"Class": pipeline.classes_, "Probability": proba})
+            st.bar_chart(df.set_index("Class"))
 
         except Exception as e:
             st.error(f"Prediction failed: {e}")
 
-# ----------------- Sidebar -----------------
 st.sidebar.title("🛡️ Cyber Threat Detection")
 module = st.sidebar.selectbox("Select Module", ["Spam Checker", "Cybersecurity Tips"])
 
