@@ -1,77 +1,34 @@
 import streamlit as st
 import joblib
-import pandas as pd
 import re
 from pathlib import Path
 
-# ----------------- Global CSS -----------------
+# ----------------- Light Theme CSS -----------------
 st.markdown("""
 <style>
-/* Neon Title */
-.neon-title {
-    font-size: 2.5em;
-    text-align: center;
-    color: #ff4d6d;
-    text-shadow: 0 0 10px #ff4d6d, 0 0 20px #ff4d6d;
-    margin-bottom: 10px;
-}
-
-/* Neon Subtitle */
-.neon-subtitle {
-    font-size: 1.4em;
-    text-align: left;
-    color: #ff4d6d;
-    text-shadow: 0 0 8px #ff4d6d;
-    margin: 15px 0;
-}
-
-/* Neon Keyword Highlight */
-.neon-keyword {
-    color: #00ffff;
-    font-weight: bold;
-    text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff;
-}
-
-/* Glass Card */
-.glass-card {
-    background: rgba(255,255,255,0.08);
+.light-card {
+    background: #F5F5F5;
     border-radius: 12px;
-    padding: 12px;
-    margin: 8px 0;
-    backdrop-filter: blur(8px);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    padding: 15px;
+    margin: 10px 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-/* History Card */
-.history-card {
-    border-left: 4px solid #00ffff;
-    transition: transform 0.3s ease;
-}
-.history-card:hover {
-    transform: translateX(5px);
-    box-shadow: 0 0 15px #00ffff;
+.keyword-highlight {
+    color: #d32f2f; /* red accent for spam words */
+    font-weight: bold;
 }
 
-/* Safe Message */
-.neon-safe {
-    font-size: 2em;
-    text-align: left;
-    color: #00ff00;
-    text-shadow: 0 0 5px #00ff00, 0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 40px #00ff00;
-    animation: glowPulse 1.5s infinite alternate;
-}
-@keyframes glowPulse {
-    from { text-shadow: 0 0 5px #00ff00, 0 0 10px #00ff00; }
-    to   { text-shadow: 0 0 20px #00ff00, 0 0 40px #00ff00; }
+.safe-message {
+    font-size: 1.5em;
+    color: #4CAF50; /* green accent */
+    font-weight: bold;
 }
 
-/* Confidence Section */
-.confidence-section {
-    margin-top: 20px;
-    padding: 12px;
-    border-radius: 10px;
-    background: rgba(255,255,255,0.05);
-    box-shadow: 0 0 15px rgba(0,255,255,0.3);
+.spam-message {
+    font-size: 1.5em;
+    color: #d32f2f; /* red accent */
+    font-weight: bold;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -93,7 +50,11 @@ SPAM_KEYWORDS = [
 def highlight_keywords(text):
     highlighted = text
     for kw in SPAM_KEYWORDS:
-        highlighted = re.sub(f"(?i)\\b{kw}\\b", f"<span class='neon-keyword'>{kw}</span>", highlighted)
+        highlighted = re.sub(
+            f"(?i)\\b{kw}\\b",
+            f"<span class='keyword-highlight'>{kw}</span>",
+            highlighted
+        )
     return highlighted
 
 # ----------------- Display History -----------------
@@ -101,11 +62,10 @@ def display_history():
     if "history" not in st.session_state or not st.session_state.history:
         return
 
-    st.markdown('<h3 class="neon-subtitle">📝 History</h3>', unsafe_allow_html=True)
-
-    for idx, item in enumerate(reversed(st.session_state.history)):
+    st.subheader("📝 History")
+    for item in reversed(st.session_state.history):
         st.markdown(f"""
-        <div class="glass-card history-card">
+        <div class="light-card">
             <p><strong>Message:</strong> {item['Message']}</p>
             <p><strong>Prediction:</strong> {item['Prediction']}</p>
             <p><strong>Confidence:</strong> {item['Confidence']}</p>
@@ -114,8 +74,8 @@ def display_history():
 
 # ----------------- Spam Checker -----------------
 def spam_checker_app():
-    st.markdown('<h1 class="neon-title">🛑 Spam / Scam Checker</h1>', unsafe_allow_html=True)
-    st.markdown('<p class="neon-subtitle">✉️ Enter your message below to detect SPAM or SCAM.</p>', unsafe_allow_html=True)
+    st.title("🛑 Spam / Scam Checker")
+    st.write("✉️ Enter your message below to detect SPAM or SCAM.")
 
     text = st.text_area("", height=150, placeholder="Type or paste your message here...")
 
@@ -139,13 +99,12 @@ def spam_checker_app():
                 probability = max(proba)
 
             highlighted_message = highlight_keywords(text)
-
-            st.markdown(f"<div class='glass-card output'>{highlighted_message}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='light-card'>{highlighted_message}</div>", unsafe_allow_html=True)
 
             if prediction == 1:
-                st.markdown('<h2 class="neon-title">🚨 SPAM/SCAM DETECTED!</h2>', unsafe_allow_html=True)
+                st.markdown('<div class="spam-message">🚨 SPAM/SCAM DETECTED!</div>', unsafe_allow_html=True)
             else:
-                st.markdown('<h2 class="neon-safe">✔ Not Spam</h2>', unsafe_allow_html=True)
+                st.markdown('<div class="safe-message">✔ Not Spam</div>', unsafe_allow_html=True)
 
             # Save to history
             if "history" not in st.session_state:
@@ -157,11 +116,7 @@ def spam_checker_app():
             })
 
             display_history()
-
-            # Confidence section wrapper
-            st.markdown('<div class="confidence-section">', unsafe_allow_html=True)
-            st.write(f"Confidence: {probability*100:.2f}%")
-            st.markdown('</div>', unsafe_allow_html=True)
+            st.metric("Confidence", f"{probability*100:.2f}%")
 
         except Exception as e:
             st.error(f"Prediction failed: {e}")
@@ -173,5 +128,5 @@ module = st.sidebar.selectbox("Select Module", ["Spam Checker", "Cybersecurity T
 if module == "Spam Checker":
     spam_checker_app()
 else:
-    st.markdown('<h1 class="neon-title">🔐 Cybersecurity Tips</h1>', unsafe_allow_html=True)
+    st.title("🔐 Cybersecurity Tips")
     st.write("Here you can add your tips content...")
