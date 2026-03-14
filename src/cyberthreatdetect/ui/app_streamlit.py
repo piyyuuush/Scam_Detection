@@ -5,7 +5,7 @@ import streamlit as st
 
 # Import page modules
 from cyberthreatdetect.ui.phishing_checker import app as phishing_app
-from cyberthreatdetect.ui.apk_scanner import apk_scanner_app
+from cyberthreatdetect.ui.url_scanner import url_scanner_app
 from cyberthreatdetect.ui.zip_scanner import zip_scanner_app
 from cyberthreatdetect.ui.spam_checker import spam_checker_app
 from cyberthreatdetect.ui.about import about_app
@@ -33,8 +33,7 @@ if "page" not in st.session_state:
 st.markdown("""
 <style>
 html, body, .stApp {
-    # background: url('https://greymatter.com/wp-content/uploads/2024/06/Cyber-security-news-header.png') no-repeat center center fixed;
-    background-color:black;
+    background: url('https://greymatter.com/wp-content/uploads/2024/06/Cyber-security-news-header.png') no-repeat center center fixed;
     background-size: cover;
     color: white;
 }
@@ -162,7 +161,7 @@ href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
 
 # ---------------------- TOP NAVBAR ----------------------
 def top_navbar():
-    pages = ["🏠 Home","✉️ Phishing","📱 APK Scan","🗂 ZIP Scan","🛑 Spam Check","ℹ️ About"]
+    pages = ["🏠 Home","✉️ Phishing","📱 url Scan","🗂 ZIP Scan","🛑 Spam Check","ℹ️ About"]
     cols = st.columns(len(pages))
 
     for i, p in enumerate(pages):
@@ -181,8 +180,8 @@ def main():
     # Sidebar selectbox
     page = st.sidebar.selectbox(
         "Select Page",
-        ["🏠 Home","✉️ Phishing","📱 APK Scan","🗂 ZIP Scan","🛑 Spam Check","ℹ️ About"],
-        index=["🏠 Home","✉️ Phishing","📱 APK Scan","🗂 ZIP Scan","🛑 Spam Check","ℹ️ About"].index(st.session_state["page"])
+        ["🏠 Home","✉️ Phishing","📱 url Scan","🗂 ZIP Scan","🛑 Spam Check","ℹ️ About"],
+        index=["🏠 Home","✉️ Phishing","📱 url Scan","🗂 ZIP Scan","🛑 Spam Check","ℹ️ About"].index(st.session_state["page"])
     )
     st.session_state["page"] = page
 
@@ -253,7 +252,7 @@ def main():
             """, unsafe_allow_html=True)
 
             if st.button("📱 Start APK Scan"):
-                st.session_state["page"] = "📱 APK Scan"
+                st.session_state["page"] = "📱 url Scan"
 
         # ---------- ZIP expander ----------
         st.markdown("<div id='zip-expander'>", unsafe_allow_html=True)
@@ -294,8 +293,8 @@ def main():
     # ---------------- PAGE ROUTES ----------------
     elif page == "✉️ Phishing":
         phishing_app()
-    elif page == "📱 APK Scan":
-        apk_scanner_app()
+    elif page == "📱 url Scan":
+        url_scanner_app()
     elif page == "🗂 ZIP Scan":
         zip_scanner_app()
     elif page == "🛑 Spam Check":
