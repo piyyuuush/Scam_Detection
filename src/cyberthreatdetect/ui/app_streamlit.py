@@ -238,18 +238,19 @@ def main():
 
         # ---------- APK expander ----------
         st.markdown("<div id='apk-expander'>", unsafe_allow_html=True)
-        with st.expander("📌 Learn About APK Malware"):
+        with st.expander("📌 Learn About url Malware"):
             st.markdown("""
             <div class="info-box big-text">
-                <b>📱 What is APK Malware?</b><br><br>
-                APK Malware is harmful Android software that can track your activity,
-                steal passwords, access banking apps, or fully control your device.
+                <b>📱 What is url Malware?</b><br><br>
+                A malicious URL is a harmful website link designed to steal your
+                personal information, login credentials, or install malware
+                on your device.
             </div>
 
-            <div class="timeline-step mid-text">⚠ Fake banking/UPI apps.</div>
-            <div class="timeline-step mid-text">📦 Apps from Telegram or MediaFire.</div>
-            <div class="timeline-step mid-text">🕵 Hidden spyware or keyloggers.</div>
-            <div class="timeline-step mid-text">💀 Ransomware APK files.</div>
+            <div class="timeline-step mid-text">⚠ ake banking login page.</div>
+            <div class="timeline-step mid-text">🎁 Fake gift or lottery websites.</div>
+            <div class="timeline-step mid-text">📩 Phishing links in emails.</div>
+            <div class="timeline-step mid-text">🦠 Websites that install malware automatically.</div>
             """, unsafe_allow_html=True)
 
             if st.button("📱 Start APK Scan"):
