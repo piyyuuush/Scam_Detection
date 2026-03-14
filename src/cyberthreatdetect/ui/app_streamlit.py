@@ -33,7 +33,8 @@ if "page" not in st.session_state:
 st.markdown("""
 <style>
 html, body, .stApp {
-    background: url('https://greymatter.com/wp-content/uploads/2024/06/Cyber-security-news-header.png') no-repeat center center fixed;
+    # background: url('https://greymatter.com/wp-content/uploads/2024/06/Cyber-security-news-header.png') no-repeat center center fixed;
+    background-color:black;
     background-size: cover;
     color: white;
 }
