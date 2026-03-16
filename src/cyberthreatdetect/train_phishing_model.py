@@ -1,63 +1,73 @@
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.linear_model import LogisticRegression
 import pandas as pd
+import re
 import joblib
-from pathlib import Path
-st.markdown("""
-<style>
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
 
-html, body, .stApp {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    background: radial-gradient(circle at top left, #0f0f0f, #1b1b1b, #000000) !important;
-}
 
-/* Hacker grid overlay */
-.stApp::before {
-    content: "";
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background-image:
-        linear-gradient(#00ff00 1px, transparent 1px),
-        linear-gradient(90deg, #00ff00 1px, transparent 1px);
-    background-size: 45px 45px;
-    opacity: 0.08;
-    z-index: -1;
-    pointer-events: none;
-}
+# -------------------------------
+# Load Dataset
+# -------------------------------
+df = pd.read_csv("services/datasets/phishing_url_dataset_10000.csv")
 
-</style>
-""", unsafe_allow_html=True)
+urls = df["url"]
+labels = df["label"]
 
-def train():
-    data = [
-        ("Your PayPal account will be suspended. Verify immediately.", 1),
-        ("Your Amazon order has been shipped.", 0),
-        ("Unusual login detected. Confirm your identity.", 1),
-        ("Your monthly bank statement is ready.", 0),
-        ("Click this link to update your password.", 1),
-        ("Your package will arrive tomorrow.", 0),
-    ]
 
-    df = pd.DataFrame(data, columns=["text", "label"])
+# -------------------------------
+# URL Feature Extraction
+# -------------------------------
+def extract_features(url):
 
-    vectorizer = TfidfVectorizer(stop_words="english")
-    X = vectorizer.fit_transform(df["text"])
-    y = df["label"]
+    return {
+        "url_length": len(url),
+        "has_https": 1 if "https" in url else 0,
+        "has_ip": 1 if re.search(r"\d+\.\d+\.\d+\.\d+", url) else 0,
+        "has_at": 1 if "@" in url else 0,
+        "dot_count": url.count("."),
+        "dash_count": url.count("-"),
+        "slash_count": url.count("/"),
+        "digit_count": sum(c.isdigit() for c in url),
+    }
 
-    model = LogisticRegression()
-    model.fit(X, y)
 
-    artifacts = Path("artifacts")
-    artifacts.mkdir(exist_ok=True)
+# -------------------------------
+# Convert URLs → Features
+# -------------------------------
+features = [extract_features(u) for u in urls]
 
-    joblib.dump(model, artifacts / "phishing_model.pkl")
-    joblib.dump(vectorizer, artifacts / "vectorizer.pkl")
+X = pd.DataFrame(features)
+y = labels
 
-    print("Model saved to artifacts/phishing_model.pkl")
-    print("Vectorizer saved to artifacts/vectorizer.pkl")
 
-if __name__ == "__main__":
-    train()
+# -------------------------------
+# Train Test Split
+# -------------------------------
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+
+# -------------------------------
+# Train Model
+# -------------------------------
+model = RandomForestClassifier(n_estimators=100)
+
+model.fit(X_train, y_train)
+
+
+# -------------------------------
+# Accuracy
+# -------------------------------
+pred = model.predict(X_test)
+
+print("Accuracy:", accuracy_score(y_test, pred))
+
+
+# -------------------------------
+# Save Model
+# -------------------------------
+joblib.dump(model, "url_model.pkl")
+
+print("✅ url_model.pkl created successfully")
