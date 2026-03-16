@@ -1,73 +1,72 @@
 import pandas as pd
-import re
 import joblib
+from pathlib import Path
+
 from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, classification_report
 
-
-# -------------------------------
+# -----------------------------
 # Load Dataset
-# -------------------------------
-df = pd.read_csv("services/datasets/phishing_url_dataset_10000.csv")
+# -----------------------------
 
-urls = df["url"]
-labels = df["label"]
+df = pd.read_csv("phishing_dataset_10000.csv")
 
+print("Dataset shape:", df.shape)
 
-# -------------------------------
-# URL Feature Extraction
-# -------------------------------
-def extract_features(url):
+X = df["text"]
+y = df["label"]
 
-    return {
-        "url_length": len(url),
-        "has_https": 1 if "https" in url else 0,
-        "has_ip": 1 if re.search(r"\d+\.\d+\.\d+\.\d+", url) else 0,
-        "has_at": 1 if "@" in url else 0,
-        "dot_count": url.count("."),
-        "dash_count": url.count("-"),
-        "slash_count": url.count("/"),
-        "digit_count": sum(c.isdigit() for c in url),
-    }
-
-
-# -------------------------------
-# Convert URLs → Features
-# -------------------------------
-features = [extract_features(u) for u in urls]
-
-X = pd.DataFrame(features)
-y = labels
-
-
-# -------------------------------
+# -----------------------------
 # Train Test Split
-# -------------------------------
+# -----------------------------
+
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42
 )
 
+# -----------------------------
+# Text Vectorization
+# -----------------------------
 
-# -------------------------------
+vectorizer = TfidfVectorizer(
+    stop_words="english",
+    max_features=5000
+)
+
+X_train_vec = vectorizer.fit_transform(X_train)
+X_test_vec = vectorizer.transform(X_test)
+
+# -----------------------------
 # Train Model
-# -------------------------------
-model = RandomForestClassifier(n_estimators=100)
+# -----------------------------
 
-model.fit(X_train, y_train)
+model = LogisticRegression(max_iter=1000)
 
+model.fit(X_train_vec, y_train)
 
-# -------------------------------
-# Accuracy
-# -------------------------------
-pred = model.predict(X_test)
+# -----------------------------
+# Evaluate Model
+# -----------------------------
 
-print("Accuracy:", accuracy_score(y_test, pred))
+pred = model.predict(X_test_vec)
 
+accuracy = accuracy_score(y_test, pred)
 
-# -------------------------------
+print("Accuracy:", accuracy)
+
+print("\nClassification Report:\n")
+print(classification_report(y_test, pred))
+
+# -----------------------------
 # Save Model
-# -------------------------------
-joblib.dump(model, "url_model.pkl")
+# -----------------------------
 
-print("✅ url_model.pkl created successfully")
+artifacts = Path("artifacts")
+artifacts.mkdir(exist_ok=True)
+
+joblib.dump(model, artifacts / "phishing_model.pkl")
+joblib.dump(vectorizer, artifacts / "vectorizer.pkl")
+
+print("\nModel saved in artifacts folder")
