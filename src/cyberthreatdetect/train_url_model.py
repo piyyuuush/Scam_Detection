@@ -5,6 +5,16 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 
+
+# -------------------------------
+# Load Dataset
+# -------------------------------
+df = pd.read_csv("services/datasets/phishing_url_dataset_10000.csv")
+
+urls = df["url"]
+labels = df["label"]
+
+
 # -------------------------------
 # URL Feature Extraction
 # -------------------------------
@@ -21,49 +31,39 @@ def extract_features(url):
         "digit_count": sum(c.isdigit() for c in url),
     }
 
-# -------------------------------
-# Example Dataset
-# -------------------------------
-urls = [
-    "https://google.com",
-    "https://github.com",
-    "https://amazon.in",
-    "http://192.168.1.1/login",
-    "http://paypal@verify-login.com",
-    "http://free-money-prize.xyz",
-    "https://facebook.com",
-    "https://stackoverflow.com",
-    "http://secure-update-account.net",
-    "http://login-bank-security.com"
-]
-
-labels = [
-    0,0,0,1,1,1,0,0,1,1
-]  # 0 = safe, 1 = phishing
 
 # -------------------------------
-# Feature Engineering
+# Convert URLs → Features
 # -------------------------------
 features = [extract_features(u) for u in urls]
 
 X = pd.DataFrame(features)
 y = labels
 
+
 # -------------------------------
-# Train Model
+# Train Test Split
 # -------------------------------
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42
 )
 
-model = RandomForestClassifier(n_estimators=100)
-model.fit(X_train, y_train)
 
 # -------------------------------
-# Accuracy Check
+# Train Model
+# -------------------------------
+model = RandomForestClassifier(n_estimators=100)
+
+model.fit(X_train, y_train)
+
+
+# -------------------------------
+# Accuracy
 # -------------------------------
 pred = model.predict(X_test)
+
 print("Accuracy:", accuracy_score(y_test, pred))
+
 
 # -------------------------------
 # Save Model
