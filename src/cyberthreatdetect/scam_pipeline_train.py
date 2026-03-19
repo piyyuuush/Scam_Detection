@@ -9,7 +9,7 @@ from pathlib import Path
 def train_pipeline():
 
     # Load your dataset (update filename here)
-    df = pd.read_csv("your_dataset.csv", encoding="latin1")
+    df = pd.read_csv("spam.csv", encoding="latin1")
 
     # Rename columns to standard names
     df = df.rename(columns={"v1": "label", "v2": "text"})
